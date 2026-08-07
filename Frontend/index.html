@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Vortex IoT — Dashboard</title>
+</head>
+<body>
+
+  <h1>Monitoramento Vortex IoT</h1>
+
+  <!-- Cada <span> tem um id único, que o JavaScript usa pra
+       encontrar exatamente esse pedaço de texto e trocar o
+       valor dele, sem mexer no resto da frase. -->
+  <p>Temperatura: <span id="temp-value">--</span> °C</p>
+  <p>Umidade: <span id="hum-value">--</span> %</p>
+  <p>Luminosidade: <span id="lum-value">--</span> lx</p>
+  <p>Status: <span id="status-value">--</span></p>
+
+  <script>
+    // URL base do backend, hospedado no Render.
+    // Fica numa variável pra não precisar repetir em todo lugar do código.
+    const API_URL = "https://vortex-iot-monitoramento.onrender.com";
+
+    function atualizarDashboard() {
+      // fetch() faz a requisição GET pra API — mesma lógica do
+      // HTTPClient que você já usa no ESP32.
+      fetch(API_URL + "/measurements")
+
+        // .then() = "quando a resposta chegar, faz isso":
+        // aqui, convertemos o corpo da resposta (texto) em JSON de verdade.
+        .then(resposta => resposta.json())
+
+        // Segundo .then() = "agora que já é JSON, faz isso":
+        // "dados" é o array de medições, ordenado da mais recente
+        // pra mais antiga (o backend já devolve nessa ordem).
+        .then(dados => {
+
+          // dados[0] é a primeira posição do array = a leitura mais nova
+          const ultima = dados[0];
+
+          // getElementById encontra o <span> pelo id, e .textContent
+          // troca o texto que aparece dentro dele
+          document.getElementById("temp-value").textContent = ultima.temperature;
+          document.getElementById("hum-value").textContent = ultima.humidity;
+          document.getElementById("lum-value").textContent = ultima.luminosity;
+
+          // ---- cálculo de status online/offline ----
+
+          // "relógio" com a hora ATUAL
+          const agora = new Date();
+
+          // "relógio" com a hora da ÚLTIMA medição salva no banco.
+          // o "+ Z" avisa que esse horário está em UTC, evitando
+          // conta errada por causa de fuso horário
+          const ultimaVez = new Date(ultima.server_timestamp + "Z");
+
+          // subtrair duas datas dá a diferença em MILISSEGUNDOS,
+          // por isso dividimos por 1000 pra virar segundos
+          const segundosPassados = (agora - ultimaVez) / 1000;
+
+          // se a última leitura chegou há 15s ou menos, considera online
+          // (o ESP32 manda dado novo a cada 10s, então 15s dá uma folga)
+          if (segundosPassados <= 15) {
+            document.getElementById("status-value").textContent = "online";
+          } else {
+            document.getElementById("status-value").textContent = "offline";
+          }
+        });
+    }
+
+    // Chama a função uma vez assim que a página carrega,
+    // pra não esperar 5s pra ver algo na tela
+    atualizarDashboard();
+
+    // Repete a mesma função a cada 5000 milissegundos (5 segundos) —
+    // é isso que faz o dashboard atualizar sozinho, sem recarregar a página
+    setInterval(atualizarDashboard, 5000);
+  </script>
+
+</body>
+</html>

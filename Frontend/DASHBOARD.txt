@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Monitoramento</title>
+</head>
+<body>
+
+  <h1>Monitoramento Condições Ambientais</h1>
+  <div>
+    <p>Temperatura: <span id="temp-value">--</span> °C</p>
+    <p>Umidade: <span id="hum-value">--</span> %</p>
+    <p>Luminosidade: <span id="lum-value">--</span> lx</p>
+  </div>
+
+</body>
+</html>

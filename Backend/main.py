@@ -16,7 +16,7 @@ import sqlite3
 from datetime import datetime
 # Usamos pra gerar o timestamp de quando a medição foi salva no servidor
 # (independente do timestamp que o ESP32 mandou, é bom ter os dois).
-
+from fastapi.middleware.cors import CORSMiddleware
 
 # ---------------------------------------------------------------------------
 # 1. CONFIGURAÇÃO DO BANCO DE DADOS
@@ -80,7 +80,12 @@ class MeasurementIn(BaseModel):
 app = FastAPI(title="Vortex IoT API")
 # Essa variável "app" é o coração da aplicação — é nela que "penduramos" cada endpoint abaixo.
 # O título aparece na documentação automática, disponível em http://localhost:8000/docs
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def on_startup():
