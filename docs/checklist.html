@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vortex IoT — Roteiro do Desafio</title>
+<style>
+  :root{
+    --bg: #0a0f1c;
+    --bg-panel: #10182b;
+    --line: #223050;
+    --ink: #dbe4f5;
+    --ink-dim: #7f8cad;
+    --cyan: #4fd8c9;
+    --violet: #8b7fff;
+    --amber: #f2b84b;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(139,127,255,0.10), transparent 40%),
+      radial-gradient(circle at 90% 15%, rgba(79,216,201,0.08), transparent 45%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    padding: 32px 20px 80px;
+  }
+
+  .wrap{ max-width: 760px; margin: 0 auto; }
+
+  header{ margin-bottom: 28px; }
+
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px; height:6px;
+    background: var(--cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--cyan);
+  }
+
+  h1{
+    font-size: 28px;
+    line-height: 1.25;
+    margin: 10px 0 6px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h1 span{ color: var(--violet); }
+
+  .sub{
+    color: var(--ink-dim);
+    font-size: 14.5px;
+    line-height: 1.5;
+    max-width: 56ch;
+  }
+
+  /* progress */
+  .progress-card{
+    margin-top: 22px;
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .progress-top{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+  #progress-count{ color: var(--cyan); font-weight:600; }
+  .bar-track{
+    height: 8px;
+    background: #1a2540;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar-fill{
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--cyan), var(--violet));
+    border-radius: 999px;
+    transition: width 0.35s ease;
+  }
+
+  /* day sections */
+  .day{
+    margin-top: 30px;
+  }
+  .day-head{
+    display:flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .day-num{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--bg);
+    background: var(--cyan);
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .day-title{ font-size: 17px; font-weight: 600; }
+  .day-note{
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    margin-left: auto;
+    font-family: var(--mono);
+  }
+
+  .phase{
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .phase-head{
+    padding: 12px 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+  }
+  .phase-time{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--amber);
+    font-weight: 400;
+  }
+
+  ul.tasks{ list-style:none; margin:0; padding: 6px; }
+  ul.tasks li{
+    display:flex;
+    align-items:flex-start;
+    gap: 10px;
+    padding: 9px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+  ul.tasks li:hover{ background: rgba(255,255,255,0.03); }
+
+  .cb{
+    flex: none;
+    width: 18px; height: 18px;
+    margin-top: 2px;
+    border: 1.5px solid #3a4a70;
+    border-radius: 5px;
+    display:flex; align-items:center; justify-content:center;
+    transition: all 0.15s ease;
+  }
+  .cb svg{ width:11px; height:11px; opacity:0; transition: opacity 0.1s; }
+  li.done .cb{ background: var(--cyan); border-color: var(--cyan); }
+  li.done .cb svg{ opacity:1; }
+  li.done .task-text{ color: var(--ink-dim); text-decoration: line-through; text-decoration-color: #3a4a70; }
+
+  .task-text{ font-size: 14px; line-height: 1.45; }
+  .task-text b{ color: var(--violet); font-weight: 600; }
+  li.done .task-text b{ color: var(--ink-dim); }
+  code{
+    font-family: var(--mono);
+    background: #1a2540;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--cyan);
+  }
+
+  footer{
+    margin-top: 36px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-dim);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Laboratório Vortex · UNIFOR</div>
+    <h1>Roteiro do desafio <span>IoT</span></h1>
+    <p class="sub">Do planejamento elétrico à entrega final — plano de 3 dias. Clique nos itens conforme for concluindo.</p>
+  </header>
+
+  <div class="progress-card">
+    <div class="progress-top">
+      <span>PROGRESSO GERAL</span>
+      <span id="progress-count">0 / 0</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+  </div>
+
+  <!-- DIA 1 -->
+  <section class="day">
+    <div class="day-head">
+      <span class="day-num">DIA 1</span>
+      <span class="day-title">Eletrônica, firmware e primeiro endpoint</span>
+      <span class="day-note">~9h</span>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Planejamento elétrico <span class="phase-time">0h–2h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Abrir novo projeto no <b>Wokwi</b> com placa ESP32</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Ligar módulo <b>DHT22</b> — VCC/GND/OUT em pino digital (ex: <code>GPIO 4</code>)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Ligar módulo <b>LDR</b> — saída AO em pino ADC (ex: <code>GPIO 34</code>)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Ligar <b>LED RGB</b> — pinos R/G/B em <code>GPIO 25, 26, 27</code>, comum no GND</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Ligar módulo <b>botão</b> — OUT em <code>GPIO 18</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Ligar módulo <b>buzzer</b> — I/O em <code>GPIO 19</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Salvar link público do projeto Wokwi (vai pro README depois)</span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Firmware — Wi-Fi + leitura simulada <span class="phase-time">2h–5h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Conectar ao Wi-Fi com <code>WiFi.h</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Definir ID único do dispositivo (ex: <code>"esp-mari-01"</code>)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Função de leitura simulada (<code>random()</code>) para temperatura, umidade e luminosidade</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Montar o JSON do payload igual ao exemplo do desafio</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Implementar reconexão automática de Wi-Fi em caso de falha</span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Backend — primeiro endpoint <span class="phase-time">5h–8h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Instalar FastAPI + Uvicorn (<code>pip install -r requirements.txt</code>)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Criar tabela no SQLite (<code>init_db()</code>)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Implementar <code>POST /measurements</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Testar com Postman/Insomnia ou <code>/docs</code> antes de plugar o ESP32</span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Conectar ESP32 → Backend <span class="phase-time">8h–9h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Rodar backend com <code>--host 0.0.0.0</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Ajustar firmware para fazer HTTP POST real (IP local da máquina)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Confirmar no terminal que os dados estão chegando e sendo salvos</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- DIA 2 -->
+  <section class="day">
+    <div class="day-head">
+      <span class="day-num">DIA 2</span>
+      <span class="day-title">API completa, dashboard e integração</span>
+      <span class="day-note">~9h</span>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Resto dos endpoints <span class="phase-time">0h–3h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Implementar <code>GET /devices</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Implementar <code>GET /devices/{id}</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Implementar <code>GET /measurements</code> (com filtro opcional por device)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Testar todos os endpoints manualmente em <code>/docs</code></span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Dashboard mínimo <span class="phase-time">3h–6h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Página HTML/JS que busca dados via <code>fetch()</code> em <code>GET /measurements</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Mostrar temperatura, umidade, luminosidade</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Mostrar status online/offline (comparar timestamp mais recente com "agora")</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Atualização automática com <code>setInterval</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Deixar responsivo (funcionar em mobile)</span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Integração completa + atuadores <span class="phase-time">6h–9h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Rodar fluxo completo: ESP32 → API → banco → dashboard ao vivo</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Lógica do LED RGB (ex: verde = normal, vermelho = temperatura alta)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Buzzer toca em condição de alerta</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Botão silencia o alerta sonoro (variável <code>alarmeSilenciado</code>)</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Caçar bugs de integração (é normal levar mais tempo que o previsto)</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- DIA 3 -->
+  <section class="day">
+    <div class="day-head">
+      <span class="day-num">DIA 3</span>
+      <span class="day-title">Documentação, vídeo e entrega</span>
+      <span class="day-note">~8h</span>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">README e diário de IA <span class="phase-time">0h–3h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Instruções de como rodar backend, firmware e dashboard</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Print do circuito no Wokwi com legenda dos pinos</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Seção obrigatória de <b>uso de IA</b>: ferramentas, prompts, dificuldades, validação, reflexão</span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Vídeo de apresentação <span class="phase-time">3h–6h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">0:00–1:00 — Apresentação e visão geral</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">1:00–3:00 — Demonstração prática do sistema</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">3:00–5:00 — Explicação técnica do código</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">5:00–6:00 — Uso da Inteligência Artificial</span></li>
+      </ul>
+    </div>
+
+    <div class="phase">
+      <div class="phase-head">Revisão final e envio <span class="phase-time">6h–8h</span></div>
+      <ul class="tasks">
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Organizar pastas: <code>Firmware/ Backend/ Frontend/ docs/ video/ README.md</code></span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Subir tudo pro GitHub/GitLab</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Conferir todos os entregáveis da seção 11 do PDF</span></li>
+        <li><span class="cb"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#0a0f1c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="task-text">Enviar o link do repositório</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>vortex-iot-roteiro · desafio técnico · unifor</footer>
+</div>
+
+<script>
+  const items = document.querySelectorAll('ul.tasks li');
+  const countEl = document.getElementById('progress-count');
+  const barEl = document.getElementById('bar-fill');
+
+  function updateProgress(){
+    const total = items.length;
+    const done = document.querySelectorAll('ul.tasks li.done').length;
+    countEl.textContent = done + ' / ' + total;
+    barEl.style.width = (total ? (done/total*100) : 0) + '%';
+  }
+
+  items.forEach(li => {
+    li.addEventListener('click', () => {
+      li.classList.toggle('done');
+      updateProgress();
+    });
+  });
+
+  updateProgress();
+</script>
+</body>
+</html>
